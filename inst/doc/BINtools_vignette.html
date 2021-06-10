@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>BINtools</title>
+
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">BINtools</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction-to-bintools">Introduction to BINtools</a><ul>
+<li><a href="#functions-and-cases">Functions and cases</a></li>
+</ul></li>
+<li><a href="#mm-both-groups-with-many-forecasters">MM: Both groups with many forecasters</a><ul>
+<li><a href="#setting-up-the-simulation-environment">Setting up the simulation environment</a></li>
+<li><a href="#generating-a-synthetic-data-set">Generating a synthetic data set</a></li>
+<li><a href="#estimating-the-bin-model">Estimating the BIN model</a></li>
+<li><a href="#analyzing-the-resulting-bin-model">Analyzing the resulting BIN model</a><ul>
+<li><a href="#parameter-estimates">Parameter estimates</a></li>
+<li><a href="#posterior-inferences">Posterior inferences</a></li>
+<li><a href="#control-vs.-treatment-comparative-analysis">Control vs. Treatment comparative analysis</a></li>
+<li><a href="#maximum-achievable-contribution">Maximum achievable contribution</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#m1-control-group-with-many-forecasters.-treatment-group-with-one-forecaster.">M1: Control group with many forecasters. Treatment group with one forecaster.</a></li>
+<li><a href="#m-control-group-with-one-forecaster.-treatment-group-with-many-forecasters.">1M: Control group with one forecaster. Treatment group with many forecasters.</a></li>
+<li><a href="#both-groups-with-one-forecaster">11: Both groups with one forecaster</a></li>
+<li><a href="#m0-one-group-with-many-forecasters">M0: One group with many forecasters</a></li>
+<li><a href="#one-group-with-one-forecaster">10: One group with one forecaster</a></li>
+</ul>
+</div>
+
+<div id="introduction-to-bintools" class="section level1">
+<h1>Introduction to BINtools</h1>
+<p>The BINtools package implements the Bayesian BIN model (Bias, Information, Noise) discussed in the paper:</p>
+<p><em>Satopää, Ville A., Marat Salikhov, Philip E. Tetlock, and Barbara Mellers. “Bias, Information, Noise: The BIN Model of Forecasting.” Management Science (2021).</em></p>
+<p>The model aims to disentangle the underlying processes that enable forecasters and forecasting methods to improve, decomposing forecasting accuracy into three components: bias, partial information, and noise. Bias refers to systematic deviations between forecasters’ interpretation of signals and the true informational value of those signals – deviations that can take the form of either over- or under-estimation of probabilities. Partial information is the informational value of the subset of signals that forecasters use – relative to full information that would permit forecasters to achieve omniscience. Finally, noise is the residual variability that is independent of the outcome.</p>
+<p>By describing the differences between two groups of forecasters, which we denote as <em>control</em> and <em>treatment</em>, the model allows the user to carry out useful inference, such as calculating the posterior probabilities of the treatment reducing bias, diminishing noise, or increasing information. It also provides insight into how much tamping down bias and noise in judgment or enhancing the efficient extraction of valid information from the environment improves forecasting accuracy.</p>
+<p>We can load the BINtools package as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(BINtools)</span></code></pre></div>
+<div id="functions-and-cases" class="section level2">
+<h2>Functions and cases</h2>
+<p>The BINtools package features three main functions:</p>
+<ul>
+<li><code>simulate_data()</code> creates synthetic data for testing and illustration purposes,</li>
+<li><code>estimate_BIN()</code> estimates a BIN model for a given set of data, and</li>
+<li><code>complete_summary()</code> produces a full BIN analysis based on a given BIN model estimation.</li>
+</ul>
+<p>It also allows for the application of the model to six different cases, determined both by the number of groups that the user wants to analyze and by the number of forecasters in each group. The cases available for analysis are listed below.</p>
+<ul>
+<li><code>MM</code>: Both groups with many forecasters.</li>
+<li><code>M1</code>: Control group with many forecasters. Treatment group with one forecaster.</li>
+<li><code>1M</code>: Control group with one forecaster. Treatment group with many forecasters.</li>
+<li><code>11</code>: Both groups with one forecaster.</li>
+<li><code>M0</code>: One group with many forecasters.</li>
+<li><code>10</code>: One group with one forecaster.</li>
+</ul>
+<p>We will illustrate how each of the functions of the package can be implemented with a detailed example of the first case, i.e., the case where two groups, denoted as control and treatment, have several forecasters. We will be applying the package’s functions on synthetic data, which can be generated using the function <code>simulate_data()</code>. The other cases are implemented in a similar manner and hence are only illustrated briefly.</p>
+</div>
+</div>
+<div id="mm-both-groups-with-many-forecasters" class="section level1">
+<h1>MM: Both groups with many forecasters</h1>
+<div id="setting-up-the-simulation-environment" class="section level2">
+<h2>Setting up the simulation environment</h2>
+<p>We define a list containing the values of the parameters, based on which our synthetic data sets will be generated. The list must include the following:</p>
+<ul>
+<li><code>mu_star</code>: Base rate of the event outcome in the probit scale. E.g., if <code>mu_star = 0</code>, then, in expectation, Phi(0)*100% = 50% of the events happen, where Phi(.) is the CDF of a standard Gaussian random variable.</li>
+<li><code>mu_0</code>: The level of bias in the control group. This can be any number in the real-line. E.g., if <code>mu_0 = 0.1</code>, then the control group believes the base rate to be Phi(<code>mu_star</code> + 0.1).</li>
+<li><code>mu_1</code>: The level of bias in the treatment group; otherwise the interpretation is the same as above for <code>mu_0</code>.</li>
+<li><code>gamma_0</code>: The level of information in the control group. This is a number between 0 and 1, where 0 represents no information and 1 represents full information.</li>
+<li><code>gamma_1</code>: The level of information in the treatment group; otherwise the interpretation is the same as above for <code>gamma_0</code>.</li>
+<li><code>delta_0</code>: The level of noise in the control group. This is a positive value, with higher values indicating higher levels of noise. Noise is in the same scale as information. E.g., <code>delta_0 = 1.0</code> says that the control group uses as many irrelevant signals as there are relevant signals in the universe. In this sense it represents a very high level of noise.</li>
+<li><code>delta_1</code>: The level of noise in the treatment group; otherwise the interpretation is the same as above for <code>delta_0</code>.</li>
+<li><code>rho_0</code>: The level of within-group dependence between forecasts of the control group. This is a positive value, with higher values indicating higher levels of dependence. The dependence can be interpreted to stem from shared irrelevant (noise) and/or relevant (information) signals.</li>
+<li><code>rho_1</code>: The level of within-group dependence between forecasts of the treatment group; otherwise the interpretation is the same as above for <code>rho_0</code>.</li>
+<li><code>rho_01</code>: The level of inter-group dependence between forecasts of the control and treatment groups; otherwise the interpretation is the same as above for <code>rho_0</code>.</li>
+</ul>
+<p>It is important to mention that not all combinations of parameters are possible. In particular, the covariance parameters gamma and rho are dependent on each other and must result in a positive semi-definite covariance matrix for the outcomes and predictions. To find a feasible set of parameters, we recommend users to experiment: begin with the desired levels of mu, gamma, and delta, and values of rho close to zero, and then increase rho until data can be generated without errors.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>true_parameters &lt;-<span class="st"> </span><span class="kw">list</span>(</span>
+<span id="cb2-2"><a href="#cb2-2"></a>    <span class="dt">mu_star =</span> <span class="fl">-0.8</span>,</span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="dt">mu_0 =</span> <span class="fl">-0.5</span>,</span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="dt">mu_1 =</span> <span class="fl">0.2</span>,</span>
+<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">gamma_0 =</span> <span class="fl">0.1</span>,</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="dt">gamma_1 =</span> <span class="fl">0.3</span>,</span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="dt">rho_0 =</span> <span class="fl">0.05</span>,</span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="dt">delta_0 =</span> <span class="fl">0.1</span>,</span>
+<span id="cb2-9"><a href="#cb2-9"></a>    <span class="dt">rho_1 =</span> <span class="fl">0.2</span>,</span>
+<span id="cb2-10"><a href="#cb2-10"></a>    <span class="dt">delta_1 =</span> <span class="fl">0.3</span>,</span>
+<span id="cb2-11"><a href="#cb2-11"></a>    <span class="dt">rho_01 =</span> <span class="fl">0.05</span></span>
+<span id="cb2-12"><a href="#cb2-12"></a>  )</span></code></pre></div>
+<p>We set the number of events we want to simulate, as well as the number of control and treatment group members making predictions over these events. In this case, we will simulate 300 events, for which predictions will also be simulated for 100 control group members and 100 treatment group members.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="co">#Number of events</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a>  N =<span class="st"> </span><span class="dv">300</span> </span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co">#Number of control group members</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>  N_<span class="dv">0</span> =<span class="st"> </span><span class="dv">100</span> </span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="co">#Number of treatment group members</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>  N_<span class="dv">1</span> =<span class="st"> </span><span class="dv">100</span> </span>
+<span id="cb3-8"><a href="#cb3-8"></a>  </span></code></pre></div>
+</div>
+<div id="generating-a-synthetic-data-set" class="section level2">
+<h2>Generating a synthetic data set</h2>
+<p>We use the <code>simulate_data()</code> function to generate a synthetic data set based on the chosen parameters.</p>
+<p>The <code>simulate_data()</code> function returns a list containing the simulated data. The elements of the list are as follows:</p>
+<ol style="list-style-type: decimal">
+<li><p><code>Outcomes</code>: Vector containing binary values that indicate the outcome of each event. The j-th entry is equal to 1 if the j-th event occurs and equal to 0 otherwise. In our example, <code>Data_mm$Outcomes</code> will consist of a 300-long vector of binary values.</p></li>
+<li><p><code>Control</code>: List of vectors (one for each event) containing probability predictions made by the forecasters in the control group. In our example, <code>Data_mm$Control</code> will consist of a 300-long list of 100-long vectors, where each vector contains the predictions made by control group members for one of the events.</p></li>
+<li><p><code>Treatment</code>: List of vectors (one for each event) containing probability predictions made by the forecasters in the treatment group. In our example, <code>Data_mm$Treatment</code> will consist of a 300-long list of 100-long vectors, where each vector contains the predictions made by treatment group members for one of the events.</p></li>
+</ol>
+<p>It is important to note that the function <code>simulate_data()</code> has an optional parameter, <code>rho_o</code>, which represents the level of dependence between event outcomes. The parameter ranges from 0.0 to 1.0, with higher values indicating higher levels of dependence, and is helpful for analyzing the behavior of the BIN model in contexts where the outcomes are not independent from each other. However, for the sake of this illustration, we will not be considering this possibility. Instead, we choose to continue with the default value ’rho_o=0.0`.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">#Simulate the data</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>DATA_mm =<span class="st"> </span><span class="kw">simulate_data</span>(true_parameters, N, N_<span class="dv">0</span>, N_<span class="dv">1</span>, <span class="dt">rho_o=</span><span class="fl">0.0</span>)</span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="co"># equivalently: DATA_mm = simulate_data(true_parameters, N, N_0, N_1)</span></span></code></pre></div>
+</div>
+<div id="estimating-the-bin-model" class="section level2">
+<h2>Estimating the BIN model</h2>
+<p>The <code>estimate_BIN()</code> function allows the user to compare two groups (treatment and control) of forecasters in terms of their bias, information, and noise levels.</p>
+<p>The <code>estimate_BIN()</code> function requires two inputs:</p>
+<ul>
+<li><code>Outcomes</code>: Vector of binary values indicating the outcome of each event. The j-th entry is equal to 1 if the j-th event occurs and equal to 0 otherwise. In our example, we will input the outcomes of our synthetic data set, i.e., <code>Data_mm$Outcomes</code>. The user can inspect <code>Data_mm</code> for the correct formatting of the input data.</li>
+<li><code>Control</code>: List of vectors containing the predictions made for each event by forecasters in the control group. The j-th vector contains predictions for the j-th event. In our example, we will input the simulated predictions for control group members, i.e., <code>Data_mm$Control</code>.</li>
+</ul>
+<p>The function <code>estimate_BIN()</code> also has the following optional inputs:</p>
+<ul>
+<li><p><code>Treatment</code>: List of vectors containing the predictions made for each event by forecasters in the treatment group. The j-th vector contains predictions for the j-th event. In our example, we have data for the predictions of two groups that we wish to compare, so we will also input predictions for treatment group members, i.e., <code>Data_mm$Treatment</code>. When left unspecified, the <code>Treatment</code> parameter is set to <code>NULL</code>. In this case, the estimate_BIN() function estimates a model tailored for the evaluation of a single forecasting group using the information provided for the control group only.</p></li>
+<li><p><code>initial</code> A list containing the initial values for the parameters <code>mu_star</code>,<code>mu_0</code>,<code>mu_1</code>,<code>gamma_0</code>,<code>gamma_1</code>,<code>delta_0</code>,<code>rho_0</code>,<code>delta_1</code>,<code>rho_1</code>,and <code>rho_01</code>. (Default: <code>list(mu_star = 0,mu_0 = 0,mu_1 = 0,gamma_0 = 0.4,gamma_1 = 0.4, delta_0 = 0.5,rho_0 = 0.27, delta_1 = 0.5,rho_1 = 0.27,rho_01 = 0.1)</code>. )</p></li>
+<li><p><code>warmup</code> The number of initial iterations used for <em>burnin</em>. The <em>burnin</em> values are included to remove the influence of a poor starting point. In other words, we allow <em>burnin</em> number of iterations for the sampler to converge. (Default:<code>2000</code>)</p></li>
+<li><p><code>iter</code> Total number of iterations. Must be larger than <code>warmup</code>. (Default:<code>4000</code>) The total number of samples will be the difference between <code>iter</code> and <code>warmup</code>. For example, if we set <code>iter = 4000</code> and <code>warmup = 2000</code>, then we will have 4000-2000 = 2000 samples in the final posterior sample.</p></li>
+<li><p><code>seed</code> This seed is used for random number generation and is an input for the model estimation process. (Default: <code>1</code>)</p></li>
+</ul>
+<p>Model estimation is performed with the statistical programming language called <a href="https://mc-stan.org/">Stan</a>. This estimates the posterior distribution using a state-of-the-art sampling technique called Hamiltonian Monte Carlo. The return object is a Stan model. This way the user can apply available diagnostics tools in other packages, such as <a href="https://mc-stan.org/rstan/">rstan</a>, to analyze the final results.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Fit the BIN model</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>full_bayesian_fit =<span class="st"> </span><span class="kw">estimate_BIN</span>(DATA_mm<span class="op">$</span>Outcomes,DATA_mm<span class="op">$</span>Control,DATA_mm<span class="op">$</span>Treatment, <span class="dt">warmup =</span> <span class="dv">2000</span>, <span class="dt">iter =</span> <span class="dv">4000</span>, <span class="dt">seed=</span><span class="dv">1</span>)</span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co">#&gt; </span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co">#&gt; SAMPLING FOR MODEL &#39;case_1_MM&#39; NOW (CHAIN 1).</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="co">#&gt; Chain 1: </span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co">#&gt; Chain 1: Gradient evaluation took 0.000737 seconds</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="co">#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 7.37 seconds.</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="co">#&gt; Chain 1: Adjust your expectations accordingly!</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="co">#&gt; Chain 1: </span></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="co">#&gt; Chain 1: </span></span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="co">#&gt; Chain 1: Iteration:    1 / 4000 [  0%]  (Warmup)</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="co">#&gt; Chain 1: Iteration:  400 / 4000 [ 10%]  (Warmup)</span></span>
+<span id="cb5-13"><a href="#cb5-13"></a><span class="co">#&gt; Chain 1: Iteration:  800 / 4000 [ 20%]  (Warmup)</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="co">#&gt; Chain 1: Iteration: 1200 / 4000 [ 30%]  (Warmup)</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a><span class="co">#&gt; Chain 1: Iteration: 1600 / 4000 [ 40%]  (Warmup)</span></span>
+<span id="cb5-16"><a href="#cb5-16"></a><span class="co">#&gt; Chain 1: Iteration: 2000 / 4000 [ 50%]  (Warmup)</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a><span class="co">#&gt; Chain 1: Iteration: 2001 / 4000 [ 50%]  (Sampling)</span></span>
+<span id="cb5-18"><a href="#cb5-18"></a><span class="co">#&gt; Chain 1: Iteration: 2400 / 4000 [ 60%]  (Sampling)</span></span>
+<span id="cb5-19"><a href="#cb5-19"></a><span class="co">#&gt; Chain 1: Iteration: 2800 / 4000 [ 70%]  (Sampling)</span></span>
+<span id="cb5-20"><a href="#cb5-20"></a><span class="co">#&gt; Chain 1: Iteration: 3200 / 4000 [ 80%]  (Sampling)</span></span>
+<span id="cb5-21"><a href="#cb5-21"></a><span class="co">#&gt; Chain 1: Iteration: 3600 / 4000 [ 90%]  (Sampling)</span></span>
+<span id="cb5-22"><a href="#cb5-22"></a><span class="co">#&gt; Chain 1: Iteration: 4000 / 4000 [100%]  (Sampling)</span></span>
+<span id="cb5-23"><a href="#cb5-23"></a><span class="co">#&gt; Chain 1: </span></span>
+<span id="cb5-24"><a href="#cb5-24"></a><span class="co">#&gt; Chain 1:  Elapsed Time: 64.545 seconds (Warm-up)</span></span>
+<span id="cb5-25"><a href="#cb5-25"></a><span class="co">#&gt; Chain 1:                79.8534 seconds (Sampling)</span></span>
+<span id="cb5-26"><a href="#cb5-26"></a><span class="co">#&gt; Chain 1:                144.398 seconds (Total)</span></span>
+<span id="cb5-27"><a href="#cb5-27"></a><span class="co">#&gt; Chain 1:</span></span></code></pre></div>
+</div>
+<div id="analyzing-the-resulting-bin-model" class="section level2">
+<h2>Analyzing the resulting BIN model</h2>
+<p>First, we provide the posterior means of the bias, noise, and information parameters. Second, by comparing components within each draw of the posterior sample, we can give posterior probabilities of the treatment group outperforming the control group with respect to each BIN component. Third, we calculate how much the treatment improves accuracy via changes in the expected bias, noise, and information. We provide a detailed description of each of the components of the analysis below.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># Create a Summary</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>summary_results=<span class="kw">complete_summary</span>(full_bayesian_fit)</span></code></pre></div>
+<div id="parameter-estimates" class="section level3">
+<h3>Parameter estimates</h3>
+<p>We show the posterior means of the parameters of interest and their differences. Beside each posterior mean are the standard deviation and the 2.5th, 25th, 50th, 75th, and 97,5th percentiles of the posterior distribution of the parameter. The values corresponding to the 2,5th and 97,5th percentiles correspond to the 95% (central) credible interval, which represents the range in which the true parameter value falls with 95% posterior probability. The credible interval differs from the classical 95% confidence interval in that it contains the true parameter value with 95% posterior probability.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>summary_results<span class="op">$</span><span class="st">`</span><span class="dt">Parameter Estimates</span><span class="st">`</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co">#&gt;    parameter_name  mean   sd  2.5%   25%   50%   75% 97.5%</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co">#&gt; 1         mu_star -0.82 0.08 -0.97 -0.87 -0.82 -0.76 -0.65</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co">#&gt; 2            mu_0 -0.50 0.08 -0.66 -0.55 -0.50 -0.45 -0.35</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">#&gt; 3            mu_1  0.20 0.07  0.07  0.16  0.20  0.25  0.35</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="co">#&gt; 4         gamma_0  0.10 0.01  0.07  0.09  0.10  0.10  0.12</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co">#&gt; 5         gamma_1  0.30 0.02  0.26  0.29  0.30  0.31  0.34</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">#&gt; 6           rho_0  0.03 0.00  0.03  0.03  0.03  0.04  0.04</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">#&gt; 7         delta_0  0.12 0.01  0.09  0.11  0.12  0.13  0.15</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="co">#&gt; 8           rho_1  0.15 0.01  0.13  0.14  0.15  0.16  0.17</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">#&gt; 9         delta_1  0.31 0.03  0.26  0.29  0.31  0.33  0.38</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="co">#&gt; 10         rho_01  0.05 0.00  0.04  0.05  0.05  0.05  0.06</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co">#&gt; 11      diff_bias  0.30 0.15  0.00  0.20  0.29  0.40  0.59</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="co">#&gt; 12      diff_info -0.20 0.02 -0.23 -0.21 -0.20 -0.19 -0.17</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="co">#&gt; 13     diff_noise -0.19 0.02 -0.25 -0.21 -0.19 -0.18 -0.15</span></span></code></pre></div>
+<p>In the results above, for example, the posterior mean of the control group bias, <code>mu_0</code>, is -0.5, and the parameter lies between -0.66 and -0.35 with 95% probability. The posterior mean of the treatment group bias, <code>mu_1</code>, is 0.2, and the parameter lies between 0.07 and 0.35 with 95% probability. The difference in bias between the treatment and control group is then |-0.5|-|0.2|=0.3 and lies between 0 and 0.59 with 95% probability.</p>
+<p>It is also worth noting that the values of the posterior means are reasonably close to the true values of the simulation environment. This corroborates the expectation that, after a sufficient amount of iterations, the parameters of the model are accurately estimated.</p>
+</div>
+<div id="posterior-inferences" class="section level3">
+<h3>Posterior inferences</h3>
+<p>This section provides the posterior probabilities of events. Compared to the control group, does the treatment group have: (i) less bias, (ii) more information, and (iii) less noise? Intuitively, one can think of these probabilities as the Bayesian analogs of the p-values in classical hypothesis testing. The closer the probability is to 1, the stronger the evidence for the hypothesis.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>summary_results<span class="op">$</span><span class="st">`</span><span class="dt">Posterior Inferences</span><span class="st">`</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="co">#&gt;                  Posterior_inferences Posterior_Probability</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="co">#&gt; 1 More information in treatment group                 1.000</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co">#&gt; 2       Less noise in treatment group                 0.000</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="co">#&gt; 3        Less bias in treatment group                 0.975</span></span></code></pre></div>
+<p>In our example, the treatment group has more information than the control group with probability 1, less noise with probability 0, and less bias with 0.975 probability.</p>
+</div>
+<div id="control-vs.-treatment-comparative-analysis" class="section level3">
+<h3>Control vs. Treatment comparative analysis</h3>
+<p>A comparative analysis of the predictive performance of the control and treatment groups is summarized under <code>$`Control,Treatment`</code>. This part of the summary contains the components listed below.</p>
+<ul>
+<li><p>Predictive performance and value of the contributions:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>  summary_results<span class="op">$</span><span class="st">`</span><span class="dt">Control,Treatment</span><span class="st">`</span><span class="op">$</span><span class="st">`</span><span class="dt">Value of the contribution</span><span class="st">`</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="co">#&gt; $mean_brier_score_1</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co">#&gt; [1] 0.1786799</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co">#&gt; </span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="co">#&gt; $mean_brier_score_0</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co">#&gt; [1] 0.1720887</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co">#&gt; </span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="co">#&gt; $contribution_bias</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="co">#&gt; [1] -0.00913257</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="co">#&gt; </span></span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="co">#&gt; $contribution_noise</span></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="co">#&gt; [1] -0.01307045</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="co">#&gt; </span></span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="co">#&gt; $contribution_information</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="co">#&gt; [1] 0.01561188</span></span></code></pre></div>
+<p>Above you can visualize the predictive performance of the control and treatment groups, measured in terms of their Brier scores. The Brier score corresponds to the mean squared error between the probability predictions and the outcome indicators. Therefore, it ranges from 0 to 1, with 0 indicating perfect accuracy. A constant prediction of 0.5 receives a Brier score of 0.25. The mean Brier score of the control group for our example was 0.1720887, while the mean Brier score of the treatment group was 0.1786799.</p>
+<p>The individual contributions of each treatment are also provided. The sum of individual contributions attributed to bias, information, and noise should roughly add up to the total contribution of the treatment, i.e., the difference between the treatment and the control mean Brier scores.</p></li>
+<li><p>Percentage of control group Brier score: Individual contributions divided by the expected Brier score of the control group. These values show, in percentage terms, how the change in the Brier score can be attributed to each component.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>summary_results<span class="op">$</span><span class="st">`</span><span class="dt">Control,Treatment</span><span class="st">`</span><span class="op">$</span><span class="st">`</span><span class="dt">Percentage of control group Brier score</span><span class="st">`</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="co">#&gt; $treatment_percentage_contribution_bias</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="co">#&gt; [1] -5.306896</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co">#&gt; </span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="co">#&gt; $treatment_percentage_contribution_noise</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co">#&gt; [1] -7.595183</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co">#&gt; </span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="co">#&gt; $treatment_percentage_contribution_information</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="co">#&gt; [1] 9.071996</span></span></code></pre></div>
+<p>In our example, the contributions to predictive accuracy attributed to bias, noise, and information were -0.009133, -0.01307, 0.015612, respectively. These contributions corresponded to -5.306896% , -7.595183% , and 9.071996% of the mean Brier score of the control group, respectively. Therefore, e.g., the control group experiences a -7.595183% change in the Brier score due to better noise reduction.</p></li>
+</ul>
+</div>
+<div id="maximum-achievable-contribution" class="section level3">
+<h3>Maximum achievable contribution</h3>
+<p>Finally, under <code>$`Control, Perfect Accuracy`</code>, an analysis of the maximum achievable contribution is given. Transformed contributions for a hypothetical treatment that induces perfect accuracy (no bias, no noise, full information) are given with respect to the control group. These values can be seen as theoretical limits on improvement for a given component (bias, information or noise). As in the case of the Control vs. Treatment analysis, the summary includes the mean Brier scores of the control and perfect accuracy groups, the individual contributions of bias, noise, and information under a perfect accuracy scenario, and the percentage of the control group Brier score that each of these contributions represents.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>summary_results<span class="op">$</span><span class="st">`</span><span class="dt">Control, Perfect Accuracy</span><span class="st">`</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="co">#&gt; $`Value of the contribution`</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="co">#&gt; $`Value of the contribution`$mean_brier_score_1</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="co">#&gt; [1] 0.001614471</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="co">#&gt; </span></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="co">#&gt; $`Value of the contribution`$mean_brier_score_0</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="co">#&gt; [1] 0.1720887</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="co">#&gt; </span></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="co">#&gt; $`Value of the contribution`$contribution_bias</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="co">#&gt; [1] 0.04627696</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="co">#&gt; </span></span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="co">#&gt; $`Value of the contribution`$contribution_noise</span></span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="co">#&gt; [1] 0.02613925</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a><span class="co">#&gt; </span></span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="co">#&gt; $`Value of the contribution`$contribution_information</span></span>
+<span id="cb11-16"><a href="#cb11-16"></a><span class="co">#&gt; [1] 0.09805805</span></span>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="co">#&gt; </span></span>
+<span id="cb11-18"><a href="#cb11-18"></a><span class="co">#&gt; </span></span>
+<span id="cb11-19"><a href="#cb11-19"></a><span class="co">#&gt; $`Percentage of control group Brier score`</span></span>
+<span id="cb11-20"><a href="#cb11-20"></a><span class="co">#&gt; $`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_bias</span></span>
+<span id="cb11-21"><a href="#cb11-21"></a><span class="co">#&gt; [1] 26.89134</span></span>
+<span id="cb11-22"><a href="#cb11-22"></a><span class="co">#&gt; </span></span>
+<span id="cb11-23"><a href="#cb11-23"></a><span class="co">#&gt; $`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_noise</span></span>
+<span id="cb11-24"><a href="#cb11-24"></a><span class="co">#&gt; [1] 15.1894</span></span>
+<span id="cb11-25"><a href="#cb11-25"></a><span class="co">#&gt; </span></span>
+<span id="cb11-26"><a href="#cb11-26"></a><span class="co">#&gt; $`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_information</span></span>
+<span id="cb11-27"><a href="#cb11-27"></a><span class="co">#&gt; [1] 56.9811</span></span></code></pre></div>
+<p>This shows the potential percentage improvements in accuracy to be gained from each BIN component. For instance, it shows that the control group can reduce their Brier score by 15.1894% by removing all noise from their predictions.</p>
+</div>
+</div>
+</div>
+<div id="m1-control-group-with-many-forecasters.-treatment-group-with-one-forecaster." class="section level1">
+<h1>M1: Control group with many forecasters. Treatment group with one forecaster.</h1>
+<p>This section shows how the model can be applied to cases where the control group has many forecasters and the treatment group has one.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># Not run:</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="co">#Number of events</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a>  N =<span class="st"> </span><span class="dv">300</span> </span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="co">#Number of control group members</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a>  N_<span class="dv">0</span> =<span class="st"> </span><span class="dv">100</span> </span>
+<span id="cb12-7"><a href="#cb12-7"></a><span class="co">#Number of treatment group members</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a>  N_<span class="dv">1</span> =<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a>  </span>
+<span id="cb12-10"><a href="#cb12-10"></a><span class="co">#Simulate the data</span></span>
+<span id="cb12-11"><a href="#cb12-11"></a>DATA_m1 =<span class="st"> </span><span class="kw">simulate_data</span>(true_parameters, N, N_<span class="dv">0</span>, N_<span class="dv">1</span>)</span>
+<span id="cb12-12"><a href="#cb12-12"></a></span>
+<span id="cb12-13"><a href="#cb12-13"></a><span class="co"># Fit the BIN model</span></span>
+<span id="cb12-14"><a href="#cb12-14"></a>full_bayesian_fit =<span class="st"> </span><span class="kw">estimate_BIN</span>(DATA_m1<span class="op">$</span>Outcomes,DATA_m1<span class="op">$</span>Control,DATA_m1<span class="op">$</span>Treatment, <span class="dt">warmup =</span> <span class="dv">2000</span>, <span class="dt">iter =</span> <span class="dv">4000</span>,<span class="dt">seed=</span><span class="dv">1</span>)</span>
+<span id="cb12-15"><a href="#cb12-15"></a></span>
+<span id="cb12-16"><a href="#cb12-16"></a><span class="co"># Create Summary</span></span>
+<span id="cb12-17"><a href="#cb12-17"></a><span class="kw">complete_summary</span>(full_bayesian_fit)</span>
+<span id="cb12-18"><a href="#cb12-18"></a></span>
+<span id="cb12-19"><a href="#cb12-19"></a><span class="co">#End(Not run)</span></span></code></pre></div>
+</div>
+<div id="m-control-group-with-one-forecaster.-treatment-group-with-many-forecasters." class="section level1">
+<h1>1M: Control group with one forecaster. Treatment group with many forecasters.</h1>
+<p>This section shows how the model can be applied to cases where the treatment group has many forecasters and the control group has one.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Not run:</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="co">#Number of events</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a>  N =<span class="st"> </span><span class="dv">300</span> </span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="co">#Number of control group members</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a>  N_<span class="dv">0</span> =<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="co">#Number of treatment group members</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a>  N_<span class="dv">1</span> =<span class="st"> </span><span class="dv">100</span> </span>
+<span id="cb13-9"><a href="#cb13-9"></a>  </span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="co">#Simulate the data</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a>DATA_1m =<span class="st"> </span><span class="kw">simulate_data</span>(true_parameters, N, N_<span class="dv">0</span>, N_<span class="dv">1</span>)</span>
+<span id="cb13-12"><a href="#cb13-12"></a></span>
+<span id="cb13-13"><a href="#cb13-13"></a><span class="co"># Fit the BIN model</span></span>
+<span id="cb13-14"><a href="#cb13-14"></a>full_bayesian_fit =<span class="st"> </span><span class="kw">estimate_BIN</span>(DATA_1m<span class="op">$</span>Outcomes, DATA_1m<span class="op">$</span>Control, DATA_1m<span class="op">$</span>Treatment, <span class="dt">warmup =</span> <span class="dv">2000</span>, <span class="dt">iter =</span> <span class="dv">4000</span>,<span class="dt">seed=</span><span class="dv">1</span>)</span>
+<span id="cb13-15"><a href="#cb13-15"></a></span>
+<span id="cb13-16"><a href="#cb13-16"></a><span class="co"># Create Summary</span></span>
+<span id="cb13-17"><a href="#cb13-17"></a><span class="kw">complete_summary</span>(full_bayesian_fit)</span>
+<span id="cb13-18"><a href="#cb13-18"></a></span>
+<span id="cb13-19"><a href="#cb13-19"></a><span class="co">#End(Not run)</span></span></code></pre></div>
+</div>
+<div id="both-groups-with-one-forecaster" class="section level1">
+<h1>11: Both groups with one forecaster</h1>
+<p>This section shows how the model can be applied to cases where both forecasting groups have only one forecaster (one prediction per event).</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># Not run:</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="co">#Number of events</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a>  N =<span class="st"> </span><span class="dv">300</span> </span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="co">#Number of control group members</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a>  N_<span class="dv">0</span> =<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="co">#Number of treatment group members</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a>  N_<span class="dv">1</span> =<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb14-9"><a href="#cb14-9"></a>  </span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="co">#Simulate the data</span></span>
+<span id="cb14-11"><a href="#cb14-11"></a>DATA_<span class="dv">11</span> =<span class="st"> </span><span class="kw">simulate_data</span>(true_parameters, N, N_<span class="dv">0</span>, N_<span class="dv">1</span>)</span>
+<span id="cb14-12"><a href="#cb14-12"></a></span>
+<span id="cb14-13"><a href="#cb14-13"></a><span class="co"># Fit the BIN model</span></span>
+<span id="cb14-14"><a href="#cb14-14"></a>full_bayesian_fit =<span class="st"> </span><span class="kw">estimate_BIN</span>(DATA_<span class="dv">11</span><span class="op">$</span>Outcomes,DATA_<span class="dv">11</span><span class="op">$</span>Control,DATA_<span class="dv">11</span><span class="op">$</span>Treatment, <span class="dt">warmup =</span> <span class="dv">2000</span>, <span class="dt">iter =</span> <span class="dv">4000</span>,<span class="dt">seed=</span><span class="dv">1</span>)</span>
+<span id="cb14-15"><a href="#cb14-15"></a></span>
+<span id="cb14-16"><a href="#cb14-16"></a><span class="co"># Create Summary</span></span>
+<span id="cb14-17"><a href="#cb14-17"></a><span class="kw">complete_summary</span>(full_bayesian_fit)</span>
+<span id="cb14-18"><a href="#cb14-18"></a></span>
+<span id="cb14-19"><a href="#cb14-19"></a><span class="co">#End(Not run)</span></span></code></pre></div>
+</div>
+<div id="m0-one-group-with-many-forecasters" class="section level1">
+<h1>M0: One group with many forecasters</h1>
+<p>Aside from comparing two groups with a single or multiple forecasters, the model can also be applied to conduct analysis on a single group of forecasters. This section illustrates how this can be done.</p>
+<p>Again, we will simulate 300 events and 100 predictions per event. This time, however, we set the size of the treatment group to 0, so that there is only one group, namely the control group, that makes 100 predictions per event.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="co">#Number of events</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a>  N =<span class="st"> </span><span class="dv">300</span> </span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="co">#Number of control group members</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a>  N_<span class="dv">0</span> =<span class="st"> </span><span class="dv">100</span> </span>
+<span id="cb15-6"><a href="#cb15-6"></a><span class="co">#Number of treatment group members</span></span>
+<span id="cb15-7"><a href="#cb15-7"></a>  N_<span class="dv">1</span> =<span class="st"> </span><span class="dv">0</span></span>
+<span id="cb15-8"><a href="#cb15-8"></a>  </span>
+<span id="cb15-9"><a href="#cb15-9"></a><span class="co">#Simulate the data</span></span>
+<span id="cb15-10"><a href="#cb15-10"></a>DATA_m =<span class="st"> </span><span class="kw">simulate_data</span>(true_parameters, N, N_<span class="dv">0</span>, N_<span class="dv">1</span>)</span></code></pre></div>
+<p>In this case, there are data for only one group. The <code>Treatment</code> input parameter of the <code>estimate_BIN()</code> function <strong>must be left blank</strong> (the default is NULL). Any other input for the Treatment parameter is likely to result in an error.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># Fit the BIN model</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="co"># equivalently: full_bayesian_fit = estimate_BIN(DATA_m$Outcomes,DATA_m$Control, Treatment=NULL, warmup = 1000, iter = 2000,seed=1)</span></span>
+<span id="cb16-3"><a href="#cb16-3"></a>full_bayesian_fit =<span class="st"> </span><span class="kw">estimate_BIN</span>(DATA_m<span class="op">$</span>Outcomes,DATA_m<span class="op">$</span>Control, <span class="dt">warmup =</span> <span class="dv">2000</span>, <span class="dt">iter =</span> <span class="dv">4000</span>, <span class="dt">seed=</span><span class="dv">1</span>)</span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="co">#&gt; </span></span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="co">#&gt; SAMPLING FOR MODEL &#39;case_4_M0&#39; NOW (CHAIN 1).</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="co">#&gt; Chain 1: </span></span>
+<span id="cb16-7"><a href="#cb16-7"></a><span class="co">#&gt; Chain 1: Gradient evaluation took 0.000284 seconds</span></span>
+<span id="cb16-8"><a href="#cb16-8"></a><span class="co">#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 2.84 seconds.</span></span>
+<span id="cb16-9"><a href="#cb16-9"></a><span class="co">#&gt; Chain 1: Adjust your expectations accordingly!</span></span>
+<span id="cb16-10"><a href="#cb16-10"></a><span class="co">#&gt; Chain 1: </span></span>
+<span id="cb16-11"><a href="#cb16-11"></a><span class="co">#&gt; Chain 1: </span></span>
+<span id="cb16-12"><a href="#cb16-12"></a><span class="co">#&gt; Chain 1: Iteration:    1 / 4000 [  0%]  (Warmup)</span></span>
+<span id="cb16-13"><a href="#cb16-13"></a><span class="co">#&gt; Chain 1: Iteration:  400 / 4000 [ 10%]  (Warmup)</span></span>
+<span id="cb16-14"><a href="#cb16-14"></a><span class="co">#&gt; Chain 1: Iteration:  800 / 4000 [ 20%]  (Warmup)</span></span>
+<span id="cb16-15"><a href="#cb16-15"></a><span class="co">#&gt; Chain 1: Iteration: 1200 / 4000 [ 30%]  (Warmup)</span></span>
+<span id="cb16-16"><a href="#cb16-16"></a><span class="co">#&gt; Chain 1: Iteration: 1600 / 4000 [ 40%]  (Warmup)</span></span>
+<span id="cb16-17"><a href="#cb16-17"></a><span class="co">#&gt; Chain 1: Iteration: 2000 / 4000 [ 50%]  (Warmup)</span></span>
+<span id="cb16-18"><a href="#cb16-18"></a><span class="co">#&gt; Chain 1: Iteration: 2001 / 4000 [ 50%]  (Sampling)</span></span>
+<span id="cb16-19"><a href="#cb16-19"></a><span class="co">#&gt; Chain 1: Iteration: 2400 / 4000 [ 60%]  (Sampling)</span></span>
+<span id="cb16-20"><a href="#cb16-20"></a><span class="co">#&gt; Chain 1: Iteration: 2800 / 4000 [ 70%]  (Sampling)</span></span>
+<span id="cb16-21"><a href="#cb16-21"></a><span class="co">#&gt; Chain 1: Iteration: 3200 / 4000 [ 80%]  (Sampling)</span></span>
+<span id="cb16-22"><a href="#cb16-22"></a><span class="co">#&gt; Chain 1: Iteration: 3600 / 4000 [ 90%]  (Sampling)</span></span>
+<span id="cb16-23"><a href="#cb16-23"></a><span class="co">#&gt; Chain 1: Iteration: 4000 / 4000 [100%]  (Sampling)</span></span>
+<span id="cb16-24"><a href="#cb16-24"></a><span class="co">#&gt; Chain 1: </span></span>
+<span id="cb16-25"><a href="#cb16-25"></a><span class="co">#&gt; Chain 1:  Elapsed Time: 16.132 seconds (Warm-up)</span></span>
+<span id="cb16-26"><a href="#cb16-26"></a><span class="co">#&gt; Chain 1:                19.2905 seconds (Sampling)</span></span>
+<span id="cb16-27"><a href="#cb16-27"></a><span class="co">#&gt; Chain 1:                35.4226 seconds (Total)</span></span>
+<span id="cb16-28"><a href="#cb16-28"></a><span class="co">#&gt; Chain 1:</span></span></code></pre></div>
+<p>In this case, the <code>complete_summary()</code> function provides the posterior means of the bias, noise, and information parameters only for the control group. A comparative analysis is also conducted with respect to a hypothetical treatment that induces perfect accuracy (no bias, no noise, full information).</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Create Summary</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a>summary_results=<span class="kw">complete_summary</span>(full_bayesian_fit)</span>
+<span id="cb17-3"><a href="#cb17-3"></a>summary_results</span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="co">#&gt; $`Parameter Estimates`</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="co">#&gt;   parameter_name  mean   sd  2.5%   25%   50%   75% 97.5%</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a><span class="co">#&gt; 1        mu_star -0.76 0.08 -0.93 -0.82 -0.75 -0.70 -0.60</span></span>
+<span id="cb17-7"><a href="#cb17-7"></a><span class="co">#&gt; 2           mu_0 -0.55 0.08 -0.70 -0.61 -0.55 -0.50 -0.39</span></span>
+<span id="cb17-8"><a href="#cb17-8"></a><span class="co">#&gt; 3        gamma_0  0.10 0.01  0.08  0.10  0.10  0.11  0.12</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a><span class="co">#&gt; 4          rho_0  0.03 0.00  0.02  0.03  0.03  0.03  0.03</span></span>
+<span id="cb17-10"><a href="#cb17-10"></a><span class="co">#&gt; 5        delta_0  0.10 0.01  0.08  0.09  0.10  0.11  0.12</span></span>
+<span id="cb17-11"><a href="#cb17-11"></a><span class="co">#&gt; </span></span>
+<span id="cb17-12"><a href="#cb17-12"></a><span class="co">#&gt; $`Control, Perfect Accuracy`</span></span>
+<span id="cb17-13"><a href="#cb17-13"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Value of the contribution`</span></span>
+<span id="cb17-14"><a href="#cb17-14"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Value of the contribution`$mean_brier_score_1</span></span>
+<span id="cb17-15"><a href="#cb17-15"></a><span class="co">#&gt; [1] 0.001688616</span></span>
+<span id="cb17-16"><a href="#cb17-16"></a><span class="co">#&gt; </span></span>
+<span id="cb17-17"><a href="#cb17-17"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Value of the contribution`$mean_brier_score_0</span></span>
+<span id="cb17-18"><a href="#cb17-18"></a><span class="co">#&gt; [1] 0.1837328</span></span>
+<span id="cb17-19"><a href="#cb17-19"></a><span class="co">#&gt; </span></span>
+<span id="cb17-20"><a href="#cb17-20"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Value of the contribution`$contribution_bias</span></span>
+<span id="cb17-21"><a href="#cb17-21"></a><span class="co">#&gt; [1] 0.05672206</span></span>
+<span id="cb17-22"><a href="#cb17-22"></a><span class="co">#&gt; </span></span>
+<span id="cb17-23"><a href="#cb17-23"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Value of the contribution`$contribution_noise</span></span>
+<span id="cb17-24"><a href="#cb17-24"></a><span class="co">#&gt; [1] 0.02401952</span></span>
+<span id="cb17-25"><a href="#cb17-25"></a><span class="co">#&gt; </span></span>
+<span id="cb17-26"><a href="#cb17-26"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Value of the contribution`$contribution_information</span></span>
+<span id="cb17-27"><a href="#cb17-27"></a><span class="co">#&gt; [1] 0.1013026</span></span>
+<span id="cb17-28"><a href="#cb17-28"></a><span class="co">#&gt; </span></span>
+<span id="cb17-29"><a href="#cb17-29"></a><span class="co">#&gt; </span></span>
+<span id="cb17-30"><a href="#cb17-30"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Percentage of control group Brier score`</span></span>
+<span id="cb17-31"><a href="#cb17-31"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_bias</span></span>
+<span id="cb17-32"><a href="#cb17-32"></a><span class="co">#&gt; [1] 30.87204</span></span>
+<span id="cb17-33"><a href="#cb17-33"></a><span class="co">#&gt; </span></span>
+<span id="cb17-34"><a href="#cb17-34"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_noise</span></span>
+<span id="cb17-35"><a href="#cb17-35"></a><span class="co">#&gt; [1] 13.07307</span></span>
+<span id="cb17-36"><a href="#cb17-36"></a><span class="co">#&gt; </span></span>
+<span id="cb17-37"><a href="#cb17-37"></a><span class="co">#&gt; $`Control, Perfect Accuracy`$`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_information</span></span>
+<span id="cb17-38"><a href="#cb17-38"></a><span class="co">#&gt; [1] 55.13582</span></span></code></pre></div>
+<p>This output can be analyzed as before:</p>
+<ul>
+<li><p>Parameter estimates: We show the posterior means of the parameters of interest and their differences. Beside each posterior mean are the standard deviation and the 2.5th, 25th, 50th, 75th, and 97,5th percentiles of the posterior distribution of the parameter. The values corresponding to the 2,5th and 97,5th percentiles correspond to the 95% (central) credible interval, which represents the range in which the true parameter value falls with 95% posterior probability. The credible interval differs from the classical 95% confidence interval in that it contains the true parameter value with 95% posterior probability.</p>
+<p>In the results above, for example, the posterior mean of the control group bias, <code>mu_0</code>, is -0.55, and the parameter lies between -0.7 and -0.39 with 95% probability. It is also worth noting that the values of the posterior means are comparable to the true values of the simulation environment, indicating that the parameters of the model are estimated accurately.</p></li>
+<li><p>Under <code>$&#39;Control, Perfect Accuracy&#39;</code>, an analysis of the maximum achievable contribution is given. Transformed contributions for a hypothetical treatment that induces perfect accuracy (no bias, no noise, full information) are given with respect to the control group. These values can be seen as theoretical limits on improvement for a given component (bias, information or noise). As in the case of the Control vs. Treatment analysis, the summary includes the mean Brier scores of the control and perfect accuracy groups, the individual contributions of bias, noise, and information under a perfect accuracy scenario, and the percentage of the control group Brier score that each of these contributions represents.</p>
+<p>This shows the potential percentage improvements in accuracy to be gained from each BIN component. For instance, it shows that the control group can reduce their Brier score by 30.872% by removing all bias from their predictions.</p></li>
+</ul>
+</div>
+<div id="one-group-with-one-forecaster" class="section level1">
+<h1>10: One group with one forecaster</h1>
+<p>This section shows how the model can be applied to cases where there is a single forecaster.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="co"># Not run:</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a></span>
+<span id="cb18-3"><a href="#cb18-3"></a><span class="co">#Number of events</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a>  N =<span class="st"> </span><span class="dv">300</span> </span>
+<span id="cb18-5"><a href="#cb18-5"></a><span class="co">#Number of control group members</span></span>
+<span id="cb18-6"><a href="#cb18-6"></a>  N_<span class="dv">0</span> =<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb18-7"><a href="#cb18-7"></a><span class="co">#Number of treatment group members</span></span>
+<span id="cb18-8"><a href="#cb18-8"></a>  N_<span class="dv">1</span> =<span class="st"> </span><span class="dv">0</span></span>
+<span id="cb18-9"><a href="#cb18-9"></a>  </span>
+<span id="cb18-10"><a href="#cb18-10"></a><span class="co">#Simulate the data</span></span>
+<span id="cb18-11"><a href="#cb18-11"></a>DATA_<span class="dv">1</span> =<span class="st"> </span><span class="kw">simulate_data</span>(true_parameters, N, N_<span class="dv">0</span>, N_<span class="dv">1</span>)</span>
+<span id="cb18-12"><a href="#cb18-12"></a></span>
+<span id="cb18-13"><a href="#cb18-13"></a><span class="co"># Fit the BIN model</span></span>
+<span id="cb18-14"><a href="#cb18-14"></a>full_bayesian_fit =<span class="st"> </span><span class="kw">estimate_BIN</span>(DATA_<span class="dv">1</span><span class="op">$</span>Outcomes,DATA_<span class="dv">1</span><span class="op">$</span>Control, <span class="dt">warmup =</span> <span class="dv">2000</span>, <span class="dt">iter =</span> <span class="dv">4000</span>,<span class="dt">seed=</span><span class="dv">1</span>)</span>
+<span id="cb18-15"><a href="#cb18-15"></a></span>
+<span id="cb18-16"><a href="#cb18-16"></a><span class="co"># Create Summary</span></span>
+<span id="cb18-17"><a href="#cb18-17"></a><span class="kw">complete_summary</span>(full_bayesian_fit)</span>
+<span id="cb18-18"><a href="#cb18-18"></a></span>
+<span id="cb18-19"><a href="#cb18-19"></a><span class="co">#End(Not run)</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

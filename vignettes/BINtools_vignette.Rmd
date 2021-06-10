@@ -1,0 +1,537 @@
+---
+title: "BINtools"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{BINtools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+# Introduction to BINtools
+
+The BINtools package implements the Bayesian BIN model (Bias, Information, Noise) discussed in the paper:
+
+  *Satopää, Ville A., Marat Salikhov, Philip E. Tetlock, and Barbara Mellers. "Bias, Information, Noise: The BIN         Model of Forecasting." Management Science (2021).*
+
+The model aims to disentangle the underlying processes that enable forecasters and forecasting methods to improve, decomposing forecasting accuracy into three components: bias, partial information, and noise. Bias refers to systematic deviations between forecasters’ interpretation of signals and the true informational value of those signals – deviations that can take the form of either over- or under-estimation of probabilities. Partial information is the informational value of the subset of signals that forecasters use – relative to full information that would permit forecasters to achieve omniscience. Finally, noise is the residual variability that is independent of the outcome. 
+
+By describing the differences between two groups of forecasters, which we denote as *control* and *treatment*, the model allows the user to carry out useful inference, such as calculating the posterior probabilities of the treatment reducing bias, diminishing noise, or increasing information. It also provides insight into how much tamping down bias and noise in judgment or enhancing the efficient extraction of valid information from the environment improves forecasting accuracy.
+
+We can load the BINtools package as follows: 
+
+
+```r
+library(BINtools)
+```
+
+## Functions and cases
+The BINtools package features three main functions: 
+
+* `simulate_data()` creates synthetic data for testing and illustration purposes,
+* `estimate_BIN()` estimates a BIN model for a given set of data, and
+* `complete_summary()` produces a full BIN analysis based on a given BIN model estimation.
+
+It also allows for the application of the model to six different cases, determined both by the number of groups that the user wants to analyze and by the number of forecasters in each group. The cases available for analysis are listed below.
+
+* `MM`: Both groups with many forecasters. 
+* `M1`: Control group with many forecasters. Treatment group with one forecaster.
+* `1M`: Control group with one forecaster. Treatment group with many forecasters.
+* `11`: Both groups with one forecaster.
+* `M0`: One group with many forecasters.
+* `10`: One group with one forecaster.
+
+
+We will illustrate how each of the functions of the package can be implemented with a detailed example of the first case, i.e., the case where two groups, denoted as control and treatment, have several forecasters. We will be applying the package's functions on synthetic data, which can be generated using the function `simulate_data()`. The other cases are implemented in a similar manner and hence are only illustrated briefly. 
+
+# MM: Both groups with many forecasters
+
+## Setting up the simulation environment
+
+We define a list containing the values of the parameters, based on which our synthetic data sets will be generated. The list must include the following: 
+
+* `mu_star`: Base rate of the event outcome in the probit scale. E.g., if `mu_star = 0`, then, in expectation, Phi(0)*100% = 50% of the events happen, where Phi(.) is the CDF of a standard Gaussian random variable.
+* `mu_0`: The level of bias in the control group. This can be any number in the real-line. E.g., if `mu_0 = 0.1`, then the control group believes the base rate to be Phi(`mu_star` + 0.1).
+* `mu_1`: The level of bias in the treatment group; otherwise the interpretation is the same as above for `mu_0`.
+* `gamma_0`: The level of information in the control group. This is a number between 0 and 1, where 0 represents no information and 1 represents full information.
+* `gamma_1`: The level of information in the treatment group; otherwise the interpretation is the same as above for `gamma_0`.
+* `delta_0`: The level of noise in the control group. This is a positive value, with higher values indicating higher levels of noise. Noise is in the same scale as information. E.g., `delta_0 = 1.0` says that the control group uses as many irrelevant signals as there are relevant signals in the universe. In this sense it represents a very high level of noise.
+* `delta_1`: The level of noise in the treatment group; otherwise the interpretation is the same as above for `delta_0`.
+* `rho_0`: The level of within-group dependence between forecasts of the control group. This is a positive value, with higher values indicating higher levels of dependence. The dependence can be interpreted to stem from shared irrelevant (noise) and/or relevant (information) signals.
+* `rho_1`: The level of within-group dependence between forecasts of the treatment group; otherwise the interpretation is the same as above for `rho_0`.
+* `rho_01`: The level of inter-group dependence between forecasts of the control and treatment groups; otherwise the interpretation is the same as above for `rho_0`.
+
+It is important to mention that not all combinations of parameters are possible. In particular, the covariance parameters gamma and rho are dependent on each other and must result in a positive semi-definite covariance matrix for the outcomes and predictions. To find a feasible set of parameters, we recommend users to experiment: begin with the desired levels of mu, gamma, and delta, and values of rho close to zero, and then increase rho until data can be generated without errors.
+
+
+```r
+true_parameters <- list(
+    mu_star = -0.8,
+    mu_0 = -0.5,
+    mu_1 = 0.2,
+    gamma_0 = 0.1,
+    gamma_1 = 0.3,
+    rho_0 = 0.05,
+    delta_0 = 0.1,
+    rho_1 = 0.2,
+    delta_1 = 0.3,
+    rho_01 = 0.05
+  )
+```
+
+We set the number of events we want to simulate, as well as the number of control and treatment group members making predictions over these events. In this case, we will simulate 300 events, for which predictions will also be simulated for 100 control group members and 100 treatment group members. 
+
+
+```r
+
+#Number of events
+  N = 300 
+#Number of control group members
+  N_0 = 100 
+#Number of treatment group members
+  N_1 = 100 
+  
+```
+
+
+## Generating a synthetic data set
+
+We use the `simulate_data()` function to generate a synthetic data set based on the chosen parameters.
+
+The `simulate_data()` function returns a list containing the simulated data. The elements of the list are as follows:
+
+1. `Outcomes`: Vector containing binary values that indicate the outcome of each event. The j-th entry is equal to 1 if the j-th event occurs and equal to 0 otherwise. In our example, `Data_mm$Outcomes` will consist of a 300-long vector of binary values. 
+
+1. `Control`: List of vectors (one for each event) containing probability predictions made by the forecasters in the control group. In our example, `Data_mm$Control` will consist of a 300-long list of 100-long vectors, where each vector contains the predictions made by control group members for one of the events. 
+
+1. `Treatment`: List of vectors (one for each event) containing probability predictions made by the forecasters in the treatment group. In our example, `Data_mm$Treatment` will consist of a 300-long list of 100-long vectors, where each vector contains the predictions made by treatment group members for one of the events. 
+
+It is important to note that the function `simulate_data()` has an optional parameter, `rho_o`, which represents the level of dependence between event outcomes. The parameter ranges from 0.0 to 1.0, with higher values indicating higher levels of dependence, and is helpful for analyzing the behavior of the BIN model in contexts where the outcomes are not independent from each other. However, for the sake of this illustration, we will not be considering this possibility. Instead, we choose to continue with the default value 'rho_o=0.0`.
+
+
+
+```r
+#Simulate the data
+DATA_mm = simulate_data(true_parameters, N, N_0, N_1, rho_o=0.0)
+# equivalently: DATA_mm = simulate_data(true_parameters, N, N_0, N_1)
+```
+
+## Estimating the BIN model
+
+The `estimate_BIN()` function allows the user to compare two groups (treatment and control) of forecasters in terms of their bias, information, and noise levels. 
+
+The `estimate_BIN()` function requires two inputs: 
+
+* `Outcomes`: Vector of binary values indicating the outcome of each event. The j-th entry is equal to 1 if the j-th event occurs and equal to 0 otherwise. In our example, we will input the outcomes of our synthetic data set, i.e., `Data_mm$Outcomes`. The user can inspect  `Data_mm` for the correct formatting of the input data.
+* `Control`: List of vectors containing the predictions made for each event by forecasters in the control group. The j-th vector contains predictions for the j-th event. In our example, we will input the simulated predictions for control group members, i.e., `Data_mm$Control`.
+
+The function `estimate_BIN()` also has the following optional inputs: 
+
+* `Treatment`: List of vectors containing the predictions made for each event by forecasters in the treatment group. The j-th vector contains predictions for the j-th event. In our example, we have data for the predictions of two groups that we wish to compare, so we will also input predictions for treatment group members, i.e., `Data_mm$Treatment`. When left unspecified, the `Treatment` parameter is set to `NULL`. In this case, the estimate_BIN() function estimates a model tailored for the evaluation of a single forecasting group using the information provided for the control group only. 
+
+* `initial`  A list containing the initial values for the parameters `mu_star`,`mu_0`,`mu_1`,`gamma_0`,`gamma_1`,`delta_0`,`rho_0`,`delta_1`,`rho_1`,and `rho_01`. (Default:  `list(mu_star = 0,mu_0 = 0,mu_1 = 0,gamma_0 = 0.4,gamma_1 = 0.4, delta_0 = 0.5,rho_0 = 0.27, delta_1 = 0.5,rho_1 = 0.27,rho_01 = 0.1)`. )
+* `warmup` The number of initial iterations used for *burnin*. The *burnin* values are included to remove the influence of a poor starting point. In other words, we allow *burnin* number of iterations for the sampler to converge. (Default:`2000`)
+* `iter` Total number of iterations. Must be larger than `warmup`. (Default:`4000`) The total number of samples will be the difference between `iter` and `warmup`. For example, if we set `iter = 4000` and  `warmup = 2000`, then we will have 4000-2000 = 2000 samples in the final posterior sample.
+* `seed` This seed is used for random number generation and is an input for the model estimation process. (Default: `1`)
+
+Model estimation is performed with the statistical programming language called [Stan](https://mc-stan.org/). This estimates the posterior distribution using a state-of-the-art sampling technique called Hamiltonian Monte Carlo. The return object is a Stan model. This way the user can apply available diagnostics tools in other packages, such as [rstan](https://mc-stan.org/rstan/), to analyze the final results.
+
+
+```r
+# Fit the BIN model
+full_bayesian_fit = estimate_BIN(DATA_mm$Outcomes,DATA_mm$Control,DATA_mm$Treatment, warmup = 2000, iter = 4000, seed=1)
+#> 
+#> SAMPLING FOR MODEL 'case_1_MM' NOW (CHAIN 1).
+#> Chain 1: 
+#> Chain 1: Gradient evaluation took 0.000737 seconds
+#> Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 7.37 seconds.
+#> Chain 1: Adjust your expectations accordingly!
+#> Chain 1: 
+#> Chain 1: 
+#> Chain 1: Iteration:    1 / 4000 [  0%]  (Warmup)
+#> Chain 1: Iteration:  400 / 4000 [ 10%]  (Warmup)
+#> Chain 1: Iteration:  800 / 4000 [ 20%]  (Warmup)
+#> Chain 1: Iteration: 1200 / 4000 [ 30%]  (Warmup)
+#> Chain 1: Iteration: 1600 / 4000 [ 40%]  (Warmup)
+#> Chain 1: Iteration: 2000 / 4000 [ 50%]  (Warmup)
+#> Chain 1: Iteration: 2001 / 4000 [ 50%]  (Sampling)
+#> Chain 1: Iteration: 2400 / 4000 [ 60%]  (Sampling)
+#> Chain 1: Iteration: 2800 / 4000 [ 70%]  (Sampling)
+#> Chain 1: Iteration: 3200 / 4000 [ 80%]  (Sampling)
+#> Chain 1: Iteration: 3600 / 4000 [ 90%]  (Sampling)
+#> Chain 1: Iteration: 4000 / 4000 [100%]  (Sampling)
+#> Chain 1: 
+#> Chain 1:  Elapsed Time: 64.545 seconds (Warm-up)
+#> Chain 1:                79.8534 seconds (Sampling)
+#> Chain 1:                144.398 seconds (Total)
+#> Chain 1:
+```
+
+
+## Analyzing the resulting BIN model
+
+First, we provide the posterior means of the bias, noise, and information parameters. Second, by comparing components within each draw of the posterior sample, we can give posterior probabilities of the treatment group outperforming the control group with respect to each BIN component. Third, we calculate how much the treatment improves accuracy via changes in the expected bias, noise, and information. We provide a detailed description of each of the components of the analysis below. 
+
+
+```r
+# Create a Summary
+summary_results=complete_summary(full_bayesian_fit)
+```
+
+### Parameter estimates
+
+We show the posterior means of the parameters of interest and their differences. Beside each posterior mean are the standard deviation and the 2.5th, 25th, 50th, 75th, and 97,5th percentiles of the posterior distribution of the parameter. The values corresponding to the 2,5th and 97,5th percentiles correspond to the 95% (central) credible interval, which represents the range in which the true parameter value falls with 95% posterior probability. The credible interval differs from the classical 95% confidence interval in that it contains the true parameter value with 95% posterior probability.
+
+
+```r
+summary_results$`Parameter Estimates`
+#>    parameter_name  mean   sd  2.5%   25%   50%   75% 97.5%
+#> 1         mu_star -0.82 0.08 -0.97 -0.87 -0.82 -0.76 -0.65
+#> 2            mu_0 -0.50 0.08 -0.66 -0.55 -0.50 -0.45 -0.35
+#> 3            mu_1  0.20 0.07  0.07  0.16  0.20  0.25  0.35
+#> 4         gamma_0  0.10 0.01  0.07  0.09  0.10  0.10  0.12
+#> 5         gamma_1  0.30 0.02  0.26  0.29  0.30  0.31  0.34
+#> 6           rho_0  0.03 0.00  0.03  0.03  0.03  0.04  0.04
+#> 7         delta_0  0.12 0.01  0.09  0.11  0.12  0.13  0.15
+#> 8           rho_1  0.15 0.01  0.13  0.14  0.15  0.16  0.17
+#> 9         delta_1  0.31 0.03  0.26  0.29  0.31  0.33  0.38
+#> 10         rho_01  0.05 0.00  0.04  0.05  0.05  0.05  0.06
+#> 11      diff_bias  0.30 0.15  0.00  0.20  0.29  0.40  0.59
+#> 12      diff_info -0.20 0.02 -0.23 -0.21 -0.20 -0.19 -0.17
+#> 13     diff_noise -0.19 0.02 -0.25 -0.21 -0.19 -0.18 -0.15
+```
+
+
+ 
+In the results above, for example, the posterior mean of the control group bias, `mu_0`, is -0.5, and the parameter lies between -0.66 and -0.35 with 95% probability. The posterior mean of the treatment group bias, `mu_1`, is 0.2, and the parameter lies between 0.07 and 0.35 with 95% probability. The difference in bias between the treatment and control group is then |-0.5|-|0.2|=0.3 and lies between 0 and 0.59 with 95% probability. 
+
+It is also worth noting that the values of the posterior means are reasonably close to the true values of the simulation environment. This corroborates the expectation that, after a sufficient amount of iterations, the parameters of the model are accurately estimated. 
+
+###	Posterior inferences
+
+This section provides the posterior probabilities of events. Compared to the control group, does the treatment group have: (i) less bias, (ii) more information, and (iii) less noise? Intuitively, one can think of these probabilities as the Bayesian analogs of the p-values in classical hypothesis testing. The closer the probability is to 1, the stronger the evidence for the hypothesis. 
+
+
+```r
+summary_results$`Posterior Inferences`
+#>                  Posterior_inferences Posterior_Probability
+#> 1 More information in treatment group                 1.000
+#> 2       Less noise in treatment group                 0.000
+#> 3        Less bias in treatment group                 0.975
+```
+
+
+
+In our example, the treatment group has more information than the control group with probability 1, less noise with probability 0, and less bias with 0.975 probability. 
+
+### Control vs. Treatment comparative analysis
+
+A comparative analysis of the predictive performance of the control and treatment groups is summarized under ``$`Control,Treatment` ``. This part of the summary contains the components listed below. 
+
+  * Predictive performance and value of the contributions: 
+
+    
+    ```r
+      summary_results$`Control,Treatment`$`Value of the contribution`
+    #> $mean_brier_score_1
+    #> [1] 0.1786799
+    #> 
+    #> $mean_brier_score_0
+    #> [1] 0.1720887
+    #> 
+    #> $contribution_bias
+    #> [1] -0.00913257
+    #> 
+    #> $contribution_noise
+    #> [1] -0.01307045
+    #> 
+    #> $contribution_information
+    #> [1] 0.01561188
+    ```
+
+
+
+    Above you can visualize the predictive performance of the control and treatment groups, measured in terms of their     Brier scores. The Brier score corresponds to the mean squared error between the probability predictions and the        outcome indicators. Therefore, it ranges from 0 to 1, with 0 indicating perfect accuracy. A constant prediction of     0.5 receives a Brier score of 0.25. The mean Brier score of the control group for our example was 0.1720887, while      the mean Brier score of the treatment group was 0.1786799.  
+    
+    The individual contributions of each treatment are also provided. The sum of individual contributions attributed to     bias, information, and noise should roughly add up to the total contribution of the treatment, i.e., the difference     between the treatment and the control mean Brier scores. 
+  
+  
+  *	Percentage of control group Brier score: Individual contributions divided by the expected Brier score of the control group. These values show, in percentage terms, how the change in the Brier score can be attributed to each component. 
+
+    
+    ```r
+    summary_results$`Control,Treatment`$`Percentage of control group Brier score`
+    #> $treatment_percentage_contribution_bias
+    #> [1] -5.306896
+    #> 
+    #> $treatment_percentage_contribution_noise
+    #> [1] -7.595183
+    #> 
+    #> $treatment_percentage_contribution_information
+    #> [1] 9.071996
+    ```
+
+
+
+    In our example, the contributions to predictive accuracy attributed to bias, noise, and information were -0.009133, -0.01307, 0.015612, respectively. These contributions  corresponded to     -5.306896% , -7.595183% , and 9.071996% of the mean Brier score of the control      group, respectively. Therefore, e.g., the control group experiences a  -7.595183% change in the Brier      score due to better noise reduction.
+
+### Maximum achievable contribution
+
+Finally, under ``$`Control, Perfect Accuracy` ``, an analysis of the maximum achievable contribution is given. Transformed contributions for a hypothetical treatment that induces perfect accuracy (no bias, no noise, full information) are given with respect to the control group. These values can be seen as theoretical limits on improvement for a given component (bias, information or noise). As in the case of the Control vs. Treatment analysis, the summary includes the mean Brier scores of the control and perfect accuracy groups, the individual contributions of bias, noise, and information under a perfect accuracy scenario, and the percentage of the control group Brier score that each of these contributions represents. 
+
+
+```r
+summary_results$`Control, Perfect Accuracy`
+#> $`Value of the contribution`
+#> $`Value of the contribution`$mean_brier_score_1
+#> [1] 0.001614471
+#> 
+#> $`Value of the contribution`$mean_brier_score_0
+#> [1] 0.1720887
+#> 
+#> $`Value of the contribution`$contribution_bias
+#> [1] 0.04627696
+#> 
+#> $`Value of the contribution`$contribution_noise
+#> [1] 0.02613925
+#> 
+#> $`Value of the contribution`$contribution_information
+#> [1] 0.09805805
+#> 
+#> 
+#> $`Percentage of control group Brier score`
+#> $`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_bias
+#> [1] 26.89134
+#> 
+#> $`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_noise
+#> [1] 15.1894
+#> 
+#> $`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_information
+#> [1] 56.9811
+```
+
+
+
+
+This shows the potential percentage improvements in accuracy to be gained from each BIN component. For instance, it shows that the control group can reduce their Brier score by 15.1894% by removing all noise from their predictions. 
+
+# M1: Control group with many forecasters. Treatment group with one forecaster.
+
+This section shows how the model can be applied to cases where the control group has many forecasters and the treatment group has one.
+
+```r
+# Not run:
+
+#Number of events
+  N = 300 
+#Number of control group members
+  N_0 = 100 
+#Number of treatment group members
+  N_1 = 1
+  
+#Simulate the data
+DATA_m1 = simulate_data(true_parameters, N, N_0, N_1)
+
+# Fit the BIN model
+full_bayesian_fit = estimate_BIN(DATA_m1$Outcomes,DATA_m1$Control,DATA_m1$Treatment, warmup = 2000, iter = 4000,seed=1)
+
+# Create Summary
+complete_summary(full_bayesian_fit)
+
+#End(Not run)
+```
+
+# 1M: Control group with one forecaster. Treatment group with many forecasters.
+
+This section shows how the model can be applied to cases where the treatment group has many forecasters and the control group has one.
+
+```r
+# Not run:
+
+#Number of events
+  N = 300 
+#Number of control group members
+  N_0 = 1
+#Number of treatment group members
+  N_1 = 100 
+  
+#Simulate the data
+DATA_1m = simulate_data(true_parameters, N, N_0, N_1)
+
+# Fit the BIN model
+full_bayesian_fit = estimate_BIN(DATA_1m$Outcomes, DATA_1m$Control, DATA_1m$Treatment, warmup = 2000, iter = 4000,seed=1)
+
+# Create Summary
+complete_summary(full_bayesian_fit)
+
+#End(Not run)
+```
+
+# 11: Both groups with one forecaster
+
+This section shows how the model can be applied to cases where both forecasting groups have only one forecaster (one prediction per event).
+
+```r
+# Not run:
+
+#Number of events
+  N = 300 
+#Number of control group members
+  N_0 = 1
+#Number of treatment group members
+  N_1 = 1
+  
+#Simulate the data
+DATA_11 = simulate_data(true_parameters, N, N_0, N_1)
+
+# Fit the BIN model
+full_bayesian_fit = estimate_BIN(DATA_11$Outcomes,DATA_11$Control,DATA_11$Treatment, warmup = 2000, iter = 4000,seed=1)
+
+# Create Summary
+complete_summary(full_bayesian_fit)
+
+#End(Not run)
+```
+
+# M0: One group with many forecasters
+
+Aside from comparing two groups with a single or multiple forecasters, the model can also be applied to conduct analysis on a single group of forecasters. This section illustrates how this can be done. 
+
+Again, we will simulate 300 events and 100 predictions per event. This time, however, we set the size of the treatment group to 0, so that there is only one group, namely the control group, that makes 100 predictions per event.
+
+
+```r
+
+#Number of events
+  N = 300 
+#Number of control group members
+  N_0 = 100 
+#Number of treatment group members
+  N_1 = 0
+  
+#Simulate the data
+DATA_m = simulate_data(true_parameters, N, N_0, N_1)
+```
+
+In this case, there are data for only one group. The `Treatment` input parameter of the `estimate_BIN()` function **must be left blank** (the default is NULL). Any other input for the Treatment parameter is likely to result in an error. 
+
+
+```r
+# Fit the BIN model
+# equivalently: full_bayesian_fit = estimate_BIN(DATA_m$Outcomes,DATA_m$Control, Treatment=NULL, warmup = 1000, iter = 2000,seed=1)
+full_bayesian_fit = estimate_BIN(DATA_m$Outcomes,DATA_m$Control, warmup = 2000, iter = 4000, seed=1)
+#> 
+#> SAMPLING FOR MODEL 'case_4_M0' NOW (CHAIN 1).
+#> Chain 1: 
+#> Chain 1: Gradient evaluation took 0.000284 seconds
+#> Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 2.84 seconds.
+#> Chain 1: Adjust your expectations accordingly!
+#> Chain 1: 
+#> Chain 1: 
+#> Chain 1: Iteration:    1 / 4000 [  0%]  (Warmup)
+#> Chain 1: Iteration:  400 / 4000 [ 10%]  (Warmup)
+#> Chain 1: Iteration:  800 / 4000 [ 20%]  (Warmup)
+#> Chain 1: Iteration: 1200 / 4000 [ 30%]  (Warmup)
+#> Chain 1: Iteration: 1600 / 4000 [ 40%]  (Warmup)
+#> Chain 1: Iteration: 2000 / 4000 [ 50%]  (Warmup)
+#> Chain 1: Iteration: 2001 / 4000 [ 50%]  (Sampling)
+#> Chain 1: Iteration: 2400 / 4000 [ 60%]  (Sampling)
+#> Chain 1: Iteration: 2800 / 4000 [ 70%]  (Sampling)
+#> Chain 1: Iteration: 3200 / 4000 [ 80%]  (Sampling)
+#> Chain 1: Iteration: 3600 / 4000 [ 90%]  (Sampling)
+#> Chain 1: Iteration: 4000 / 4000 [100%]  (Sampling)
+#> Chain 1: 
+#> Chain 1:  Elapsed Time: 16.132 seconds (Warm-up)
+#> Chain 1:                19.2905 seconds (Sampling)
+#> Chain 1:                35.4226 seconds (Total)
+#> Chain 1:
+```
+
+In this case, the `complete_summary()` function provides the posterior means of the bias, noise, and information parameters only for the control group. A comparative analysis is also conducted with respect to a hypothetical treatment that induces perfect accuracy (no bias, no noise, full information). 
+
+
+```r
+# Create Summary
+summary_results=complete_summary(full_bayesian_fit)
+summary_results
+#> $`Parameter Estimates`
+#>   parameter_name  mean   sd  2.5%   25%   50%   75% 97.5%
+#> 1        mu_star -0.76 0.08 -0.93 -0.82 -0.75 -0.70 -0.60
+#> 2           mu_0 -0.55 0.08 -0.70 -0.61 -0.55 -0.50 -0.39
+#> 3        gamma_0  0.10 0.01  0.08  0.10  0.10  0.11  0.12
+#> 4          rho_0  0.03 0.00  0.02  0.03  0.03  0.03  0.03
+#> 5        delta_0  0.10 0.01  0.08  0.09  0.10  0.11  0.12
+#> 
+#> $`Control, Perfect Accuracy`
+#> $`Control, Perfect Accuracy`$`Value of the contribution`
+#> $`Control, Perfect Accuracy`$`Value of the contribution`$mean_brier_score_1
+#> [1] 0.001688616
+#> 
+#> $`Control, Perfect Accuracy`$`Value of the contribution`$mean_brier_score_0
+#> [1] 0.1837328
+#> 
+#> $`Control, Perfect Accuracy`$`Value of the contribution`$contribution_bias
+#> [1] 0.05672206
+#> 
+#> $`Control, Perfect Accuracy`$`Value of the contribution`$contribution_noise
+#> [1] 0.02401952
+#> 
+#> $`Control, Perfect Accuracy`$`Value of the contribution`$contribution_information
+#> [1] 0.1013026
+#> 
+#> 
+#> $`Control, Perfect Accuracy`$`Percentage of control group Brier score`
+#> $`Control, Perfect Accuracy`$`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_bias
+#> [1] 30.87204
+#> 
+#> $`Control, Perfect Accuracy`$`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_noise
+#> [1] 13.07307
+#> 
+#> $`Control, Perfect Accuracy`$`Percentage of control group Brier score`$perfect_accuracy_percentage_contribution_information
+#> [1] 55.13582
+```
+
+
+
+This output can be analyzed as before:
+
+*	Parameter estimates: We show the posterior means of the parameters of interest and their differences. Beside each posterior mean are the standard deviation and the 2.5th, 25th, 50th, 75th, and 97,5th percentiles of the posterior distribution of the parameter. The values corresponding to the 2,5th and 97,5th percentiles correspond to the 95% (central) credible interval, which represents the range in which the true parameter value falls with 95% posterior probability. The credible interval differs from the classical 95% confidence interval in that it contains the true parameter value with 95% posterior probability. 
+
+    In the results above, for example, the posterior mean of the control group bias, `mu_0`, is -0.55, and the        parameter lies between -0.7 and -0.39 with 95% probability. It is also worth noting that the        values of the posterior means are comparable to the true values of the simulation environment, indicating that the     parameters of the model are estimated accurately. 
+
+* Under `$'Control, Perfect Accuracy'`, an analysis of the maximum achievable contribution is given. Transformed contributions for a hypothetical treatment that induces perfect accuracy (no bias, no noise, full information) are given with respect to the control group. These values can be seen as theoretical limits on improvement for a given component (bias, information or noise). As in the case of the Control vs. Treatment analysis, the summary includes the mean Brier scores of the control and perfect accuracy groups, the individual contributions of bias, noise, and information under a perfect accuracy scenario, and the percentage of the control group Brier score that each of these contributions represents. 
+
+  This shows the potential percentage improvements in accuracy to be gained from each BIN       component. For instance, it shows that the control group can reduce their Brier score by      30.872% by removing all bias from their predictions. 
+
+
+# 10: One group with one forecaster
+
+This section shows how the model can be applied to cases where there is a single forecaster. 
+
+
+```r
+# Not run:
+
+#Number of events
+  N = 300 
+#Number of control group members
+  N_0 = 1
+#Number of treatment group members
+  N_1 = 0
+  
+#Simulate the data
+DATA_1 = simulate_data(true_parameters, N, N_0, N_1)
+
+# Fit the BIN model
+full_bayesian_fit = estimate_BIN(DATA_1$Outcomes,DATA_1$Control, warmup = 2000, iter = 4000,seed=1)
+
+# Create Summary
+complete_summary(full_bayesian_fit)
+
+#End(Not run)
+```
+
+
