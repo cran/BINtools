@@ -62,7 +62,7 @@ synthetic_data = simulate_data(list(mu_star = -0.8,mu_0 = -0.5,mu_1 = 0.2,gamma_
 gamma_1 = 0.3, rho_0 = 0.05,delta_0 = 0.1, rho_1 = 0.2, delta_1 = 0.3,rho_01 = 0.05), 300,100,100)
 # b) Estimate the BIN-model on the synthetic data:
 full_bayesian_fit = estimate_BIN(synthetic_data$Outcomes,synthetic_data$Control,
-synthetic_data$Treatment,warmup = 500, iter = 1000)
+synthetic_data$Treatment, warmup = 500, iter = 1000)
 # c) Analyze the results:
 complete_summary(full_bayesian_fit)
 }

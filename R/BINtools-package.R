@@ -8,6 +8,7 @@
 #' @useDynLib BINtools, .registration = TRUE
 #' @import methods
 #' @import Rcpp
+#' @import rstantools
 #' @importFrom rstan sampling
 #' @importFrom stats pnorm
 #' @importFrom stats qnorm

@@ -1,6 +1,6 @@
 Package: BINtools
 Title: Bayesian BIN (Bias, Information, Noise) Model of Forecasting
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
      c(person(given = "Ville",
            family = "Satopää",
@@ -25,24 +25,24 @@ Description: A recently proposed Bayesian BIN model disentangles the underlying 
     Model of Forecasting" <doi:10.1287/mnsc.2020.3882>. 
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Biarch: true
 Depends: R (>= 3.4.0)
 Imports: methods, Rcpp (>= 0.12.0), rstan (>= 2.18.1), dplyr (>=
         1.0.2), tibble (>= 3.0.3), stringi (>= 1.4.6), mvtnorm (>=
-        1.1.1), combinat (>= 0.0.8)
+        1.1.1), combinat (>= 0.0.8), rstantools
 LinkingTo: BH (>= 1.66.0), Rcpp (>= 0.12.0), RcppEigen (>= 0.3.3.3.0),
         RcppParallel (>= 5.0.1), rstan (>= 2.18.1), StanHeaders (>=
         2.18.0)
 SystemRequirements: GNU make
-Suggests: testthat, knitr, rmarkdown, pacman (>= 0.5.1), rstantools (>=
-        2.1.1), RcppParallel (>= 5.0.1)
+Suggests: testthat, knitr, rmarkdown, pacman (>= 0.5.1), RcppParallel
+        (>= 5.0.1)
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2021-06-09 14:12:11 UTC; elviramoreno
+Packaged: 2022-04-04 11:58:36 UTC; ville.satopaa
 Author: Ville Satopää [aut, cre] (<https://orcid.org/0000-0002-3787-7303>),
   Marat Salikhov [aut],
   Elvira Moreno [aut]
 Maintainer: Ville Satopää <ville.satopaa@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-06-10 08:20:12 UTC
+Date/Publication: 2022-04-04 12:40:02 UTC
